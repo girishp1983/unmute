@@ -5,15 +5,14 @@ import time
 from typing import Any, cast
 
 from unmute.kyutai_constants import LLM_SERVER
-from unmute.llm.llm_utils import VLLMStream, get_openai_client, rechunk_to_words
+from unmute.llm.llm_utils import GroqStream, get_openai_client, rechunk_to_words
 
 # Predefined message
 PREDEFINED_MESSAGE = "Explain the second law of thermodynamics"
 
 
-async def main(server_url: str):
-    client = get_openai_client(server_url=server_url)
-    s = VLLMStream(client)
+async def main():
+    s = GroqStream()
 
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
@@ -51,4 +50,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    asyncio.run(main(args.server_url))
+    asyncio.run(main())

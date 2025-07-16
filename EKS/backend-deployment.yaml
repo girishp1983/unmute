@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unmute-backend
+  namespace: unmute
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: unmute-backend
+  template:
+    metadata:
+      labels:
+        app: unmute-backend
+    spec:
+      containers:
+      - name: unmute-backend
+        image: unmute-backend:latest  # Build from the modified source
+        ports:
+        - containerPort: 8080
+        env:
+        - name: GROQ_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: unmute-secrets
+              key: GROQ_API_KEY
+        envFrom:
+        - configMapRef:
+            name: unmute-config
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unmute-backend-service
+  namespace: unmute
+spec:
+  selector:
+    app: unmute-backend
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP

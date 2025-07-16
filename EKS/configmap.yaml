@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unmute-config
+  namespace: unmute
+data:
+  KYUTAI_STT_URL: "ws://stt-service:8090"
+  KYUTAI_TTS_URL: "ws://tts-service:8089"
+  KYUTAI_VOICE_CLONING_URL: "http://voice-cloning-service:8092"
+  KYUTAI_REDIS_URL: "redis://redis-service:6379"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: unmute-secrets
+  namespace: unmute
+type: Opaque
+stringData:
+  GROQ_API_KEY: "YOUR_GROQ_API_KEY_HERE"  # Replace with your actual API key

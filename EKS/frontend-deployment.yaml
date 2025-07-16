@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unmute-frontend
+  namespace: unmute
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: unmute-frontend
+  template:
+    metadata:
+      labels:
+        app: unmute-frontend
+    spec:
+      containers:
+      - name: unmute-frontend
+        image: unmute-frontend:latest  # Build from the frontend source
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NEXT_PUBLIC_BACKEND_URL
+          value: "http://unmute-backend-service:8080"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unmute-frontend-service
+  namespace: unmute
+spec:
+  selector:
+    app: unmute-frontend
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: ClusterIP

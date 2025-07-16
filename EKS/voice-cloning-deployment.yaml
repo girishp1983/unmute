@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voice-cloning-service
+  namespace: unmute
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: voice-cloning-service
+  template:
+    metadata:
+      labels:
+        app: voice-cloning-service
+    spec:
+      nodeSelector:
+        node.kubernetes.io/instance-type: g6e.12xlarge
+      containers:
+      - name: voice-cloning-service
+        image: kyutai/voice-cloning:latest  # Replace with actual voice cloning image
+        ports:
+        - containerPort: 8092
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+            memory: "4Gi"
+            cpu: "2"
+          limits:
+            nvidia.com/gpu: 2
+            memory: "8Gi"
+            cpu: "4"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: voice-cloning-service
+  namespace: unmute
+spec:
+  selector:
+    app: voice-cloning-service
+  ports:
+  - port: 8092
+    targetPort: 8092
+  type: ClusterIP

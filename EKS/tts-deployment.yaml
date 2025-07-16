@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tts-service
+  namespace: unmute
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tts-service
+  template:
+    metadata:
+      labels:
+        app: tts-service
+    spec:
+      nodeSelector:
+        node.kubernetes.io/instance-type: g6e.12xlarge
+      containers:
+      - name: tts-service
+        image: kyutai/moshi-server:latest  # Replace with actual TTS image
+        ports:
+        - containerPort: 8089
+        env:
+        - name: CONFIG_FILE
+          value: "/app/configs/tts.toml"
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+            memory: "4Gi"
+            cpu: "2"
+          limits:
+            nvidia.com/gpu: 2
+            memory: "8Gi"
+            cpu: "4"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/configs
+      volumes:
+      - name: config-volume
+        configMap:
+          name: tts-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tts-service
+  namespace: unmute
+spec:
+  selector:
+    app: tts-service
+  ports:
+  - port: 8089
+    targetPort: 8089
+  type: ClusterIP

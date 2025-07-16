@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stt-service
+  namespace: unmute
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stt-service
+  template:
+    metadata:
+      labels:
+        app: stt-service
+    spec:
+      nodeSelector:
+        node.kubernetes.io/instance-type: g6e.12xlarge
+      containers:
+      - name: stt-service
+        image: kyutai/moshi-server:latest  # Replace with actual STT image
+        ports:
+        - containerPort: 8090
+        env:
+        - name: CONFIG_FILE
+          value: "/app/configs/stt.toml"
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+            memory: "4Gi"
+            cpu: "2"
+          limits:
+            nvidia.com/gpu: 2
+            memory: "8Gi"
+            cpu: "4"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/configs
+      volumes:
+      - name: config-volume
+        configMap:
+          name: stt-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stt-service
+  namespace: unmute
+spec:
+  selector:
+    app: stt-service
+  ports:
+  - port: 8090
+    targetPort: 8090
+  type: ClusterIP

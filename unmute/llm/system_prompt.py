@@ -90,8 +90,8 @@ LANGUAGE_CODE_TO_INSTRUCTIONS: dict[LanguageCode | None, str] = {
 
 
 def get_readable_llm_name():
-    model = autoselect_model()
-    return model.replace("-", " ").replace("_", " ")
+    # Return the Groq model name directly
+    return "moonshotai kimi k2 instruct"
 
 
 class ConstantInstructions(BaseModel):

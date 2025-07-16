@@ -6,6 +6,7 @@ from typing import Any, AsyncIterator, Protocol, cast
 
 from mistralai import Mistral
 from openai import AsyncOpenAI, OpenAI
+from groq import AsyncGroq
 
 from unmute.kyutai_constants import LLM_SERVER
 
@@ -115,6 +116,26 @@ class MistralStream:
             delta = event.data.choices[0].delta.content
             assert isinstance(delta, str)  # make Pyright happy
             yield delta
+
+
+class GroqStream:
+    def __init__(self):
+        self.groq = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
+
+    async def chat_completion(
+        self, messages: list[dict[str, str]]
+    ) -> AsyncIterator[str]:
+        event_stream = await self.groq.chat.completions.create(
+            model="moonshotai/kimi-k2-instruct",
+            messages=cast(Any, messages),
+            stream=True,
+            temperature=1.0,
+        )
+
+        async for chunk in event_stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield delta
 
 
 def get_openai_client(server_url: str = LLM_SERVER) -> AsyncOpenAI:
